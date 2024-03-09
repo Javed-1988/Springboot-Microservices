@@ -3,6 +3,8 @@ package com.javed.departmentservice.controller;
 import com.javed.departmentservice.entity.Department;
 import com.javed.departmentservice.service.DepartmentService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -11,13 +13,23 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
+//@RefreshScope
 @Slf4j
 @RequestMapping(value = "/api/department")
 public class DepartmentController {
 
+    @Value("${spring.boot.message}")
+    private String message;
     private final DepartmentService service;
     public DepartmentController(DepartmentService service) {
         this.service = service;
+    }
+
+    @GetMapping("/message")
+    public String getMessage()
+    {
+       return message;
+
     }
 
     @PostMapping("/savedepartment")
