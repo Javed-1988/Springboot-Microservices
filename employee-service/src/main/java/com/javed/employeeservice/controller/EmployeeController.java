@@ -18,6 +18,7 @@ import java.util.Optional;
 @RestController
 @Slf4j
 @AllArgsConstructor
+@RequestMapping(value = "/api/employee")
 public class EmployeeController {
 
     private final EmployeeService service;
