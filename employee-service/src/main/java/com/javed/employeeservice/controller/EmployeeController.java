@@ -27,15 +27,14 @@ public class EmployeeController {
     @PostMapping("/saveemp")
     public ResponseEntity<Object> saveEmp(@RequestBody Employee employee)
     {
-        //ResponseEntity<DepartmentDto> response= restTemplate.getForEntity("http://localhost:8080/getdepartmentByCode/IT001",DepartmentDto.class);
-        DepartmentDto response=webClient.get().uri("http://localhost:8080/getdepartmentByCode/IT001").retrieve().bodyToMono(DepartmentDto.class).block();
-
-        ResponseEntity<String> response1= restTemplate.getForEntity("http://localhost:8080/getdepartment",String.class);
+        ResponseEntity<String> response1= restTemplate.getForEntity("http://localhost:8080/api/department/getdepartment",String.class);
         log.info("Dept-cod:---------------------"+response1.getBody());
+        ResponseEntity<DepartmentDto> response= restTemplate.getForEntity("http://localhost:8080/api/department/getdepartmentByCode/IT001",DepartmentDto.class);
+        //DepartmentDto response=webClient.get().uri("http://localhost:8080/getdepartmentByCode/IT001").retrieve().bodyToMono(DepartmentDto.class).block();
         //employee.setDept_code(response.getBody().getDept_code());
         //log.info("Dept-cod:--"+response.getBody().getDept_code());
-        employee.setDept_code(response.getDept_code());
-        log.info("Dept-cod:--"+response.getDept_code());
+        employee.setDept_code(response.getBody().getDept_code());
+        log.info("Dept-cod:--"+response.getBody().getDept_code());
         Employee emp=service.saveEmployee(employee);
         return new ResponseEntity<>(emp, HttpStatus.CREATED);
     }
