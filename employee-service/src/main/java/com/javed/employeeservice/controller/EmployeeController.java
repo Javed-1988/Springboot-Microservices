@@ -3,6 +3,7 @@ package com.javed.employeeservice.controller;
 import com.javed.employeeservice.entity.DepartmentDto;
 import com.javed.employeeservice.entity.Employee;
 import com.javed.employeeservice.service.EmployeeService;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -24,19 +25,32 @@ public class EmployeeController {
     private final EmployeeService service;
     private final RestTemplate restTemplate;
     private final WebClient webClient;
+
+    @CircuitBreaker(name = "EMPLOYEE-SERVICE", fallbackMethod = "fallBackMethodSaveEmp")
     @PostMapping("/saveemp")
     public ResponseEntity<Object> saveEmp(@RequestBody Employee employee)
     {
-        ResponseEntity<String> response1= restTemplate.getForEntity("http://localhost:8080/api/department/getdepartment",String.class);
-        log.info("Dept-cod:---------------------"+response1.getBody());
+        //ResponseEntity<String> response1= restTemplate.getForEntity("http://localhost:8080/api/department/getdepartment",String.class);
+        //log.info("Dept-cod:---------------------"+response1.getBody());
         ResponseEntity<DepartmentDto> response= restTemplate.getForEntity("http://localhost:8080/api/department/getdepartmentByCode/IT001",DepartmentDto.class);
         //DepartmentDto response=webClient.get().uri("http://localhost:8080/getdepartmentByCode/IT001").retrieve().bodyToMono(DepartmentDto.class).block();
         //employee.setDept_code(response.getBody().getDept_code());
         //log.info("Dept-cod:--"+response.getBody().getDept_code());
-        employee.setDept_code(response.getBody().getDept_code());
         log.info("Dept-cod:--"+response.getBody().getDept_code());
-        Employee emp=service.saveEmployee(employee);
-        return new ResponseEntity<>(emp, HttpStatus.CREATED);
+        if(response.getBody().getDept_code()!=null)
+        {employee.setDept_code(response.getBody().getDept_code());
+            Employee emp=service.saveEmployee(employee);
+            return new ResponseEntity<>(emp, HttpStatus.CREATED);
+        }
+        else {
+            return new ResponseEntity<>("Internal Server Error", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+    }
+
+    public ResponseEntity<?> fallBackMethodSaveEmp(@RequestBody Employee employee,Exception exception)
+    {
+        return  new ResponseEntity<>(" This is fallback method Department service is down try after sometime",HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     @GetMapping("/getemp")
